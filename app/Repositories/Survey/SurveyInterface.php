@@ -71,4 +71,14 @@ interface SurveyInterface
     public function getResultFromRedirectSection($sections, $userRepo);
 
     public function getPublicResults($survey);
+
+    public function getAllSurvey($data);
+
+    public function getQuestionToSheet($groupQuestion, $questions);
+
+    public function getResultToSheet($data, $survey, $newVals, $orderQuestion);
+
+    public function getNormalDataToSheet($data, $survey, $title, $orderQuestion);
+
+    public function getRedirectDataToSheet($data, $survey, $title);
 }

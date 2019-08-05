@@ -386,6 +386,8 @@ Route::group(['middleware' => 'profile'], function () {
 
         Route::post('surveys/export', 'ExportController@export')->name('export-result');
 
+        Route::post('surveys/syns-to-sheets', 'ExportController@synsToSheets')->name('syns-to-sheets');
+
         Route::post('surveys/preview/get-json', [
             'uses' => 'PreviewSurveyController@getJson',
             'as' => 'survey.create.get-json',

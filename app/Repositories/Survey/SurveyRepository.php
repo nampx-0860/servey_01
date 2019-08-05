@@ -1408,4 +1408,148 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
             $query->where('key', config('settings.setting_type.privacy.key'));
         }])->paginate(config('settings.survey.paginate'));
     }
+
+    public function getQuestionToSheet($groupQuestion, $questions)
+    {
+        foreach ($groupQuestion as $question) {
+            if (!in_array($question->type, [
+                config('settings.question_type.title'),
+                config('settings.question_type.image'),
+                config('settings.question_type.video'),
+            ])) {
+                if ($question->settings->first()->key == config('settings.question_type.linear_scale')) {
+                    $settingValue = $question->setting_value;
+                    $linearQuestion = $question['title'] . ' ( ' . $settingValue->min_value . ' = ' . $settingValue->min_content . ' , ' . $settingValue->max_value . ' = ' . $settingValue->max_content . ' )';
+
+                    array_push($questions, $linearQuestion);
+                } elseif ($question->settings->first()->key == config('settings.question_type.grid')) {
+                    $options = json_decode($question->settings->first()->value, true);
+                    $strOption = '';
+
+                    foreach ($options as $option) {
+                        $strOption = $strOption . ' ( ' . $option . ' )';
+                    }
+
+                    array_push($questions, $question->title . $strOption);
+                } else {
+
+                    array_push($questions, $question['title']);
+                }
+            }
+        }
+
+        return $questions;
+    }
+
+    public function getResultToSheet($data, $survey, $newVals, $orderQuestion = '')
+    {
+        if (count($data['results'])) {
+            foreach ($data['results'] as $result) {
+                $results = [];
+                $result = $result->sortBy('order')->sortBy('section_order');
+
+                if ($orderQuestion != '') {
+                    $groupByResults = $result->groupBy('question_id');
+                    $finalResults = [];
+                    foreach ($orderQuestion as $value) {
+                        $finalResults[$value] = $groupByResults[$value];
+                    }
+                } else $finalResults = $result->groupBy('question_id');
+
+                array_push($results, $result->first()->created_at->toDateTimeString());
+
+                if ($data['requiredSurvey'] != config('settings.survey_setting.answer_required.none')) {
+                    array_push($results, $result->first()->user ? $result->first()->user->email : trans('lang.incognito'));
+                }
+
+                foreach ($finalResults as $answers) {
+                    if ($answers->count() == 1) {
+                        if ($answers->first()->question->type == config('settings.question_type.grid')) {
+                            $subQuestions = $answers->first()->question->sub_questions;
+                            $subOptions = json_decode($answers->first()->question->settings->first()->value);
+                            $gridResult = json_decode($answers->first()->content, true);
+                            $strGrid = '';
+
+                            foreach ($subQuestions as $key => $subQuestion) {
+                                $indexQuestion = $key + 1;
+                                foreach ($subOptions as $key => $subOption) {
+                                    if ($gridResult[$indexQuestion] == ($key + 1)) {
+                                        $gridAnswer = ' [ ' . $subQuestion .  ':' . $subOption . ' ] ';
+                                        $strGrid = $strGrid . $gridAnswer;
+                                    }
+                                }
+                            }
+
+                            array_push($results, $strGrid);
+                        } else {
+                            array_push($results, $answers->first()->content_answer);
+                        }
+                    } else {
+                        array_push($results, $answers->implode('content_answer', ', '));
+                    }
+                }
+                $orderQuestion != ''
+                    ? array_push($newVals[str_limit($survey->title, config('settings.limit_title_excel'))], $results)
+                    : array_push($newVals[str_limit($data['title'], config('settings.limit_title_excel'))], $results);
+            }
+        }
+
+        return $newVals;
+    }
+
+    public function getNormalDataToSheet($data, $survey, $title, $orderQuestion)
+    {
+        $data['questions'] = $data['questions']->groupBy('section_id');
+        $questions = [trans('lang.timestamps')];
+
+        if ($data['requiredSurvey'] != config('settings.survey_setting.answer_required.none')) {
+            array_push($questions, trans('lang.email'));
+        }
+
+        $newVals = [
+            str_limit($survey->title, config('settings.limit_title_excel')) => [
+                [trans('lang.sun_asterisk_vn')],
+                [$title],
+                [trans('lang.date_create') . $survey->created_at],
+                [],
+            ]
+        ];
+
+        foreach ($data['questions'] as $groupQuestion) {
+            $groupQuestion = $groupQuestion->sortBy('order');
+            $questions = $this->getQuestionToSheet($groupQuestion, $questions);
+        }
+
+        array_push($newVals[str_limit($survey->title, config('settings.limit_title_excel'))], $questions);
+        $newVals = $this->getResultToSheet($data, $survey, $newVals, $orderQuestion);
+
+        return $newVals;
+    }
+
+    public function getRedirectDataToSheet($data, $survey, $title)
+    {
+        foreach ($data as $dataRedirect) {
+            $questions = [trans('lang.timestamps')];
+
+            if ($dataRedirect['requiredSurvey'] != config('settings.survey_setting.answer_required.none')) {
+                array_push($questions, trans('lang.email'));
+            }
+
+            $newVals[str_limit($dataRedirect['title'], config('settings.limit_title_excel'))] = [
+                [trans('lang.sun_asterisk_vn')],
+                [$title],
+                [trans('lang.date_create') . $survey->created_at],
+                [],
+            ];
+            $questions = $this->getQuestionToSheet($dataRedirect['questions'], $questions);
+
+            array_push($newVals[str_limit($dataRedirect['title'], config('settings.limit_title_excel'))], $questions);
+        }
+
+        foreach ($data as $dataRedirect) {
+            $newVals = $this->getResultToSheet($dataRedirect, $survey, $newVals);
+        }
+
+        return $newVals;
+    }
 }

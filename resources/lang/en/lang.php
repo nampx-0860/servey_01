@@ -268,6 +268,8 @@ return [
     'exit' => 'Exit',
     'export' => 'Download',
     'export_error' => 'Export error!',
+    'syns_to_sheets' => 'Syns to Google Sheets',
+    'syns_sheets_error' => 'Syns to sheets error!',
     'create_other' => 'Create other survey',
     'not_permission_to_doing_this_survey' => 'You do not have permission to doing this survey!',
     'has_replied_the_maximum_number_of_limit_replies' => 'You has replied the maximum number of limit replies!',
