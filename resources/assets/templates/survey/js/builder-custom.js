@@ -1844,7 +1844,7 @@ jQuery(document).ready(function () {
         $(this).closest('li.form-line').find('.description-input .question-description-input').keyup();
     });
 
-    $('.survey-form').on('keydown', '.question-input, .question-description-input', function (e) {
+    $('.survey-form').on('keydown', '.question-input', function (e) {
         if (((e.keyCode || e.which) === 13) && !e.shiftKey) {
             return false;
         }
