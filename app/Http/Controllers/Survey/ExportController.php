@@ -30,12 +30,14 @@ class ExportController extends Controller
             $data = $this->surveyRepository->getResultExport($survey, $request->month);
             $title = $request->name ? str_limit($request->name, config('settings.limit_title_excel')) : str_limit($survey->title, config('settings.limit_title_excel'));
             $orderQuestion = [];
-
-            foreach ($data['questions']->groupBy('section_id') as $questionOfSection) {
-                $questionOfSection = $questionOfSection->where('type', '!=', config('settings.question_type.title'))
-                    ->where('type', '!=', config('settings.question_type.image'))
-                    ->where('type', '!=', config('settings.question_type.video'));
-                $orderQuestion = array_merge($orderQuestion, $questionOfSection->sortBy('order')->pluck('id')->toArray());
+    
+            if (!count($survey->sections->where('redirect_id', '!=', 0))) {
+                foreach ($data['questions']->groupBy('section_id') as $questionOfSection) {
+                    $questionOfSection = $questionOfSection->where('type', '!=', config('settings.question_type.title'))
+                        ->where('type', '!=', config('settings.question_type.image'))
+                        ->where('type', '!=', config('settings.question_type.video'));
+                    $orderQuestion = array_merge($orderQuestion, $questionOfSection->sortBy('order')->pluck('id')->toArray());
+                }
             }
 
             return Excel::create($title, function ($excel) use ($title, $data, $survey, $orderQuestion) {
@@ -51,13 +53,23 @@ class ExportController extends Controller
                     });
                 } else {
                     foreach ($data as $dataRedirect) {
-                        $excel->sheet($dataRedirect['title'], function ($sheet) use ($dataRedirect, $survey) {
-                            $sheet->loadView('clients.export.excel', ['data' => $dataRedirect, 'survey' => $survey]);
+
+                        foreach ($dataRedirect['questions']->groupBy('section_id') as $questionOfSection) {
+                            $questionOfSection = $questionOfSection->where('type', '!=', config('settings.question_type.title'))
+                                ->where('type', '!=', config('settings.question_type.image'))
+                                ->where('type', '!=', config('settings.question_type.video'));
+                            $orderQuestion = array_merge($orderQuestion, $questionOfSection->sortBy('order')->pluck('id')->toArray());
+                        }
+                        
+                        $excel->sheet($dataRedirect['title'], function ($sheet) use ($dataRedirect, $survey, $orderQuestion) {
+                            $dataRedirect['questions'] = $dataRedirect['questions']->groupBy('section_id');
+                            $sheet->loadView('clients.export.excel', ['data' => $dataRedirect, 'survey' => $survey, 'orderQuestion' => $orderQuestion]);
                             $sheet->setOrientation('landscape')
                                 ->getDefaultStyle()
                                 ->getAlignment()
-                                ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);;
+                                ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                         });
+                        $orderQuestion = [];
                     }
                 }
             })->export($request->type);
