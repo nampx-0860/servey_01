@@ -416,4 +416,5 @@ return [
     'see_overview' => 'See overview',
     'see_result' => 'See result',
     'search_result' => 'Search results',
+    'loading_hide' => 'Loading...',
 ];

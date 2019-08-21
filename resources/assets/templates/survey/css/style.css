@@ -4507,3 +4507,7 @@ span>div.draggable-area {
 .owner-name {
     color: #1875f0 !important;
 }
+
+.loading-hide {
+    display: none;
+}

@@ -38,7 +38,7 @@
                             title="@lang('lang.export_excel')">
                             <i class="fa fa-download" aria-hidden="true"></i>
                         </a>&nbsp;
-                        <p class="option-menu btn btn-info" id="syns-to-sheets"
+                        <button class="option-menu btn btn-info" id="syns-to-sheets"
                             data-api-key="{{ config('settings.api_key') }}"
                             data-client-id="{{ config('settings.clientID') }}"
                             data-google-scope="{{ config('settings.google_scope') }}"
@@ -46,7 +46,8 @@
                             data-token="{{ $survey->token }}"
                             title="@lang('lang.syns_to_sheets')">
                             {{ str_limit(trans('lang.syns_to_sheets'), config('settings.limit_button')) }}
-                        </p>
+                        </button>
+                        <button class="option-menu btn btn-info loading-hide" disabled>@lang('lang.loading_hide')</button>
                     </div>
                 </div>
             </li>
