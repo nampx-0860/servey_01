@@ -1,3 +1,4 @@
+{!! Html::script(elixir(config('settings.public_template') . 'js/google-platform.js')) !!}
 <div class="background-user-profile"></div>
 <!-- .cd-main-header -->
 <main class="cd-main-content">
@@ -30,12 +31,22 @@
                             @lang('result.personal')
                         </a>
                     </div>
+
                     <div class="btn-export-excel col-md-6 col-xs-3">
                         <a href="#" class="option-menu" id="export-file-excel" data-toggle="modal" data-target="#rename-excel"
                             data-url="{{ route('export-result', [$survey->token, '', '']) }}"
                             title="@lang('lang.export_excel')">
                             <i class="fa fa-download" aria-hidden="true"></i>
-                        </a>
+                        </a>&nbsp;
+                        <p class="option-menu btn btn-info" id="syns-to-sheets"
+                            data-api-key="{{ config('settings.api_key') }}"
+                            data-client-id="{{ config('settings.clientID') }}"
+                            data-google-scope="{{ config('settings.google_scope') }}"
+                            data-url="{{ route('syns-to-sheets') }}"
+                            data-token="{{ $survey->token }}"
+                            title="@lang('lang.syns_to_sheets')">
+                            {{ str_limit(trans('lang.syns_to_sheets'), config('settings.limit_button')) }}
+                        </p>
                     </div>
                 </div>
             </li>

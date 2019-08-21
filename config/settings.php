@@ -334,6 +334,7 @@ return [
     'limit_answer_content' => 80,
     'detect_page_refresh' => 'max-age=0',
     'limit_title_excel' => 25,
+    'limit_button' => 10,
     'invited' => 1,
     'date_format_vn' => 'DD/MM/YYYY',
     'date_format_en' => 'MM/DD/YYYY',
@@ -373,4 +374,7 @@ return [
     'title_copy' => 'Copy',
     'min_time' => ' 00:00:00',
     'max_time' => ' 23:59:59',
+    'clientID' => env('GOOGLE_CLIENT_ID'),
+    'api_key' => env('GOOGLE_API_KEY'),
+    'google_scope' => 'https://www.googleapis.com/auth/spreadsheets',
 ];

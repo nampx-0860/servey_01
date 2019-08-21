@@ -504,3 +504,150 @@ function escapeSpecialChars(jsonString) {
         .replace(/\\f/g, " ")
         .replace(/\\"/g, " ");
 }
+
+// Syns to Google Sheets
+function createSheets(data, valueAddSheet) {
+    var spreadsheetBody = {
+        "properties": {
+            "title": data['surveyInfo']['title'],
+        },
+        "sheets": valueAddSheet
+    };
+    var request = gapi.client.sheets.spreadsheets.create({}, spreadsheetBody);
+
+    request.then(function (response) {
+        if (data.surveyInfo.redirect.length == 0) {
+            putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title'], response.result['spreadsheetUrl']);
+        } else {
+            for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data.surveyInfo.redirect[i]);
+            }
+        }
+        openInNewTab(response.result['spreadsheetUrl']);
+    }, function (reason) {
+        console.error('error: ' + reason.result.error.message);
+    });
+}
+
+function putDataIntoSheets(data, ssID, surveyTitle) {
+    var range = surveyTitle;
+    var params = {
+        spreadsheetId: ssID,
+        range: range,
+        valueInputOption: 'RAW',
+    };
+    var valueRangeBody = {
+        "values": data[surveyTitle]
+    };
+    var request = gapi.client.sheets.spreadsheets.values.update(params, valueRangeBody);
+
+    request.then(function (response) {
+        console.log(response.result);
+    }, function (reason) {
+        console.error('error: ' + reason.result.error.message);
+    });
+}
+
+function initClient() {
+    var API_KEY = $('#syns-to-sheets').data('api-key');
+    var CLIENT_ID = $('#syns-to-sheets').data('client-id');
+    var SCOPE = $('#syns-to-sheets').data('google-scope');
+
+    gapi.client.init({
+        'apiKey': API_KEY,
+        'clientId': CLIENT_ID,
+        'scope': SCOPE,
+        'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+    }).then(function () {
+        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSignInStatus);
+        updateSignInStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    });
+}
+
+function handleClientLoad() {
+    gapi.load('client:auth2', initClient);
+}
+
+function updateSignInStatus(isSignedIn) { //function này không có thì API k chạy nhưng lại k xử lý logic ở đây
+    isSignedIn ? console.log('Signin Success') : console.log('Signin Fail');
+}
+
+function handleSignInClick(data) {
+    gapi.auth2.getAuthInstance().signIn()
+        .then(function (response) {
+            var valueAddSheet = []
+            var formatSheet = [];
+            if (data['surveyInfo']['redirect'].length == 0) {
+                valueAddSheet.push({
+                    "properties": {
+                        "sheetId": 0,
+                        "title": data['surveyInfo']['title'],
+                    }
+                })
+                for (var i = 0; i <= 3; i++) {
+                    formatSheet.push({
+                        "sheetId": 0,
+                        "startRowIndex": i,
+                        "endRowIndex": i + 1,
+                    })
+                }
+                valueAddSheet.push({
+                    "merges": formatSheet,
+                })
+            } else {
+                for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                    valueAddSheet.push({
+                        "properties": {
+                            "sheetId": i,
+                            "title": data.surveyInfo.redirect[i],
+                        }
+                    })
+                }
+                for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                    for (var j = 0; j <= 3; j++) {
+                        formatSheet.push({
+                            "sheetId": i,
+                            "startRowIndex": j,
+                            "endRowIndex": j + 1,
+                        })
+                    }
+                }
+                valueAddSheet.push({
+                    "merges": formatSheet,
+                })
+            }
+            createSheets(data, valueAddSheet);
+        });
+}
+
+function handleSignOutClick() {
+    gapi.auth2.getAuthInstance().signOut();
+}
+
+function getDataToSheets() {
+    var url = $('#syns-to-sheets').data('url');
+    var token = $('#syns-to-sheets').data('token');
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            token: token,
+        },
+    })
+        .done(function (data) {
+            handleSignInClick(data);
+        });
+}
+
+function openInNewTab(href) {
+    Object.assign(document.createElement('a'), {
+        target: '_blank',
+        href,
+    }).click();
+}
+
+$(document).on('click', '#syns-to-sheets', function (event) {
+    getDataToSheets();
+});
