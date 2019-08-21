@@ -415,4 +415,5 @@ return [
     'see_overview' => 'Xem tổng quan',
     'see_result' => 'Xem kết quả',
     'search_result' => 'Kết quả tìm kiếm',
+    'loading_hide' => 'Đang tải...',
 ];
