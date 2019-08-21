@@ -152,6 +152,48 @@ jQuery(document).ready(function () {
         addValidationRuleForRowAndColumn(questionId);
     });
 
+    $(document).on('click', '.add-choice-dropdown', function () {
+        var multipleChoiceBlock = $(this).closest('.multiple-choice-block');
+        var choice = $(this).closest('.multiple-choice-block').find('.choice').first();
+        var nextElement;
+
+        otherChoiceOption = multipleChoiceBlock.find('.other-choice-option');
+
+        if (otherChoiceOption.length) {
+            nextElement = choice.clone().insertBefore(otherChoiceOption);
+        } else {
+            nextElement = choice.clone().insertBefore($(this).closest('.other-choice'));
+        }
+
+        // reshow remove button when copy answer element from first element
+        $(this).closest('li.form-line.sort').find('.remove-choice-option').removeClass('hidden');
+
+        var questionElement = $(this).closest('li.form-line.sort');
+        var questionId = questionElement.data('question-id');
+        var answerId = refreshAnswerId();
+        nextElement.data('answer-id', answerId);
+        nextElement.attr('id', `answer_${answerId}`);
+        var numberOfAnswers = questionElement.data('number-answer');
+        var optionId = numberOfAnswers + 1;
+        nextElement.data('option-id', optionId);
+        questionElement.data('number-answer', numberOfAnswers + 1);
+
+        var input = nextElement.find('.answer-option-input');
+        input.attr('name', `answer[question_${questionId}][answer_${answerId}][option_${optionId}]`);
+        input.val(Lang.get('lang.option', { index: nextElement.index() + 1 }));
+        input.select();
+        input.focus();
+        
+        resetIndexRow(questionId);
+        addValidationRuleForAnswer(answerId);
+    });
+
+    function resetIndexRow(questionId){
+        $(`#question_${questionId}`).find('.form-row.element-content').find('.multiple-choice-block').find('.form-row').each(function (index) {
+            $(this).find('.radio-choice-icon').text(index + 1 + '.');
+        });
+    }
+
     $(document).on('mouseover', '.sub-question-content', function () {
         $(this).closest('.row-column-content').find('div.draggable-area').css('display', 'block');
     });
@@ -1894,6 +1936,10 @@ jQuery(document).ready(function () {
             input.select();
             input.focus();
 
+            if($(this).closest('.form-line').data('question-type') == 13){
+                resetIndexRow(questionId);
+            }
+
             // add validation rule for answer input element
             addValidationRuleForAnswer(answerId);
             e.preventDefault();
@@ -1931,6 +1977,7 @@ jQuery(document).ready(function () {
     // remove choice option
     $('.survey-form').on('click', '.form-line .multiple-choice-block .remove-choice-option', function (e) {
         e.preventDefault();
+        var questionId = $(this).closest('.form-row').data('question-id');
         var option = $(this).closest('.choice.choice-sortable');
 
         if ($(this).closest('.multiple-choice-block').find('.choice.choice-sortable').length > 1) {
@@ -1942,6 +1989,8 @@ jQuery(document).ready(function () {
                 parentElement.find('.remove-choice-option').addClass('hidden');
             }
         }
+
+        resetIndexRow(questionId);
     });
 
     $('.survey-form').on('click', '.form-line .multiple-choice-block .remove-other-choice-option', function (e) {

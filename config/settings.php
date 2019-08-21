@@ -235,6 +235,7 @@ return [
         'redirect' => 10,
         'linear_scale' => 11,
         'grid' => 12,
+        'dropdown' => 13,
     ],
     'survey_setting' => [
         'default' => 0,
@@ -370,6 +371,7 @@ return [
     'path_backup_data' => 'app/backup_data',
     'number_day_backup' => 7,
     'linear_scale_icon' => '/templates/survey/images/linear_scale.png',
+    'dropdown_icon' => '/templates/survey/images/dropdown.png',
     'limit_grid' => 15,
     'title_copy' => 'Copy',
     'min_time' => ' 00:00:00',

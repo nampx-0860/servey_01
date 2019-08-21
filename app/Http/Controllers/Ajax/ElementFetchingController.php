@@ -431,4 +431,33 @@ class ElementFetchingController extends Controller
             'image' => $image,
         ]);
     }
+
+    public function fetchDropdownQuestion(Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json([
+                'success' => false,
+            ]);
+        }
+
+        $sectionId = $request->sectionId;
+        $questionId = $request->questionId;
+        $answerId = $request->answerId;
+        $optionId = config('settings.survey.option.first');
+        $imageURL = $request->imageURL;
+
+        $image = $imageURL ? view('clients.survey.elements.image-question', compact('imageURL'))->render() : '';
+
+        return response()->json([
+            'success' => true,
+            'html' => view('clients.survey.elements.dropdown', compact(
+                'sectionId',
+                'questionId',
+                'answerId',
+                'optionId',
+                'imageURL'
+            ))->render(),
+            'image' => $image,
+        ]);
+    }
 }
