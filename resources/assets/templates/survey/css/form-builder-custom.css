@@ -4103,3 +4103,13 @@ input[name="quantity-answer"]::-webkit-outer-spin-button, input[type="number"]::
 .group-detail-result>.ul-result {
     width: 80%;
 }
+
+.add-choice-dropdown {
+    cursor: pointer;
+    color: #4285f4;
+    font-weight: bold;
+}
+
+.add-choice-dropdown:hover {
+    border-bottom: 1px dotted #333;
+}
