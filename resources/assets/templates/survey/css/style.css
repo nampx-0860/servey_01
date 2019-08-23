@@ -4519,3 +4519,13 @@ span>div.draggable-area {
 .dropdown img {
     width: 25px;
 }
+
+.item-dropdown {
+    min-height: 60px;
+}
+
+.icon-dropdown {
+    width: 24px;
+    height: 24px;
+    fill: #000000;
+}

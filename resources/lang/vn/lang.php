@@ -417,4 +417,5 @@ return [
     'search_result' => 'Kết quả tìm kiếm',
     'loading_hide' => 'Đang tải...',
     'dropdown' => 'Danh sách',
+    'dropdown_choice' => 'Lựa chọn',
 ];

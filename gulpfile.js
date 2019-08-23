@@ -13,7 +13,7 @@ var shell = require('gulp-shell');
  */
 gulp.task('langjs', shell.task('php artisan lang:js -c public/plugins/languages/messages.js'));
 
-elixir(function(mix) {
+elixir(function (mix) {
     mix.task('langjs')
         .copy('node_modules/jquery/dist/jquery.min.js', 'public/plugins/jquery')
         .copy('node_modules/bootstrap/', 'public/plugins/bootstrap')

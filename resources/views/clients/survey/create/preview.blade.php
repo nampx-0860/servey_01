@@ -101,6 +101,9 @@
                                     <!-- multiple choice grid -->
                                     @elseif ($question->type === config('settings.question_type.grid'))
                                         @include ('clients.survey.create.elements-preview.grid')
+                                    <!-- dropdown -->
+                                    @elseif ($question->type === config('settings.question_type.dropdown'))
+                                        @include ('clients.survey.create.elements-preview.dropdown')
                                     @endif
                                     @if ($question->type == config('settings.question_type.redirect'))
                                         <div class="notice-required">@lang('lang.question_required')</div>

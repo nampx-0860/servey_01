@@ -418,4 +418,5 @@ return [
     'search_result' => 'Search results',
     'loading_hide' => 'Loading...',
     'dropdown' => 'Dropdown',
+    'dropdown_choice' => 'Select',
 ];
