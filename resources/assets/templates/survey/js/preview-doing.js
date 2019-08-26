@@ -717,3 +717,85 @@ function autoResizeTextarea() {
         $(this).on('keyup input', function () { resizeTextarea(this); }).removeAttr('data-autoresize');
     });
 }
+
+// dropdown question
+window.onload = function () {
+    crear_select();
+}
+
+function crear_select() {
+    var arrSelect = new Array();
+    var div_cont_select = document.querySelectorAll("[data-option-select='active']");
+    var select_ = '';
+
+    for (var e = 0; e < div_cont_select.length; e++) {
+        div_cont_select[e].setAttribute('data-indx-select', e);
+        div_cont_select[e].setAttribute('data-selec-open', 'false');
+        var ul_cont = document.querySelectorAll("[data-indx-select='" + e + "'] > .cont-list-dropdown-question > ul");
+        select_ = document.querySelectorAll("[data-indx-select='" + e + "'] >select")[0];
+        var select_optiones = select_.options;
+        document.querySelectorAll("[data-indx-select='" + e + "']  > .selected-option ")[0].setAttribute('data-n-select', e);
+        document.querySelectorAll("[data-indx-select='" + e + "']  > .icon-dropdown-question ")[0].setAttribute('data-n-select', e);
+
+        for (var i = 0; i < select_optiones.length; i++) {
+            arrSelect[i] = document.createElement('li');
+            if (select_optiones[i].selected == true || select_.value == select_optiones[i].innerHTML) {
+                arrSelect[i].className = 'active';
+                document.querySelector("[data-indx-select='" + e + "']  > .selected-option ").innerHTML = select_optiones[i].innerHTML;
+            };
+
+            arrSelect[i].setAttribute('data-index', i);
+            arrSelect[i].setAttribute('data-selec-index', e);
+            arrSelect[i].addEventListener('click', function () { _select_option(this.getAttribute('data-index'), this.getAttribute('data-selec-index')); });
+
+            arrSelect[i].innerHTML = select_optiones[i].innerHTML;
+            ul_cont[0].appendChild(arrSelect[i]);
+        };
+    };
+}
+
+$('.selected-option').on('click', function () {
+    var index_selected = document.querySelector('.selected-option').getAttribute('data-n-select');
+    var index_cont_li = document.querySelectorAll("[data-indx-select='" + index_selected + "'] .cont-select-int > li");
+    var new_index = 0;
+    var slect_open = document.querySelectorAll("[data-indx-select='" + index_selected + "']")[0].getAttribute('data-selec-open');
+
+    for (var i = 0; i < index_cont_li.length; i++) {
+        new_index += index_cont_li[i].offsetHeight;
+    };
+
+    if (slect_open == 'false') {
+        document.querySelectorAll("[data-indx-select='" + index_selected + "']")[0].setAttribute('data-selec-open', 'true');
+        document.querySelectorAll("[data-indx-select='" + index_selected + "'] > .cont-list-dropdown-question > ul")[0].style.height = new_index + "px";
+        document.querySelectorAll("[data-indx-select='" + index_selected + "'] > .icon-dropdown-question")[0].style.transform = 'rotate(180deg)';
+    } else {
+        document.querySelectorAll("[data-indx-select='" + index_selected + "']")[0].setAttribute('data-selec-open', 'false');
+        document.querySelectorAll("[data-indx-select='" + index_selected + "'] > .icon-dropdown-question")[0].style.transform = 'rotate(0deg)';
+        document.querySelectorAll("[data-indx-select='" + index_selected + "'] > .cont-list-dropdown-question > ul")[0].style.height = "0px";
+    }
+})
+
+function fetchIndex(indx) {
+    document.querySelectorAll("[data-indx-select='" + indx + "'] > .cont-list-dropdown-question > ul")[0].style.height = "0px";
+    document.querySelector("[data-indx-select='" + indx + "'] > .icon-dropdown-question").style.transform = 'rotate(0deg)';
+    document.querySelectorAll("[data-indx-select='" + indx + "']")[0].setAttribute('data-selec-open', 'false');
+}
+
+function _select_option(indx, selc) {
+    var select_ = document.querySelectorAll("[data-indx-select='" + selc + "'] > select")[0];
+    var lists = document.querySelectorAll("[data-indx-select='" + selc + "'] .cont-select-int > li");
+    document.querySelectorAll("[data-indx-select='" + selc + "'] > .selected-option")[0].innerHTML = lists[indx].innerHTML;
+    var select_optiones = document.querySelectorAll("[data-indx-select='" + selc + "'] > select > option");
+
+    for (var i = 0; i < lists.length; i++) {
+        if (lists[i].className == 'active') {
+            lists[i].className = '';
+        };
+        lists[indx].className = 'active';
+    };
+
+    select_optiones[indx].selected = true;
+    select_.selectedIndex = indx;
+    $(select_).on("change");
+    fetchIndex(selc);
+}

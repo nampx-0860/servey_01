@@ -186,6 +186,7 @@ jQuery(document).ready(function () {
         
         resetIndexRow(questionId);
         addValidationRuleForAnswer(answerId);
+        multipleChoiceSortable(`question_${questionId}`);
     });
 
     function resetIndexRow(questionId){

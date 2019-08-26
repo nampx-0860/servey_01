@@ -178,6 +178,15 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
                         $valueSetting = json_encode($question['subOptions']);
                     }
 
+                    if ($question['type'] == config('settings.question_type.dropdown')) {
+                        $valueDropdown = [];
+                        foreach ($question['answers'] as $option) {
+                            array_push($valueDropdown, $option['content']);
+                        }
+
+                        $valueSetting = json_encode($valueDropdown);
+                    }
+
                     $questionCreated->settings()->create([
                         'key' => $question['type'],
                         'value' => $valueSetting,
