@@ -77,6 +77,8 @@
                     @include ('clients.survey.detail.elements.linear_scale')
                 @elseif ($questionSetting == config('settings.question_type.grid'))
                     @include ('clients.survey.detail.elements.grid')
+                @elseif ($questionSetting == config('settings.question_type.dropdown'))
+                    @include ('clients.survey.detail.elements.dropdown')
                 @endif
             @endif
             @if ($question->required)

@@ -33,6 +33,7 @@ class ResultRequest extends FormRequest
             config('settings.question_type.redirect'),
             config('settings.question_type.linear_scale'),
             config('settings.question_type.grid'),
+            config('settings.question_type.dropdown'),
         ]);
 
         $rules = [
@@ -75,6 +76,7 @@ class ResultRequest extends FormRequest
                 config('settings.question_type.time'),
                 config('settings.question_type.linear_scale'),
                 config('settings.question_type.grid'),
+                config('settings.question_type.dropdown'),
             ])) {
                 $rules['sections.' . $sectionIndex . '.questions.' . $questionIndex . '.results.*.content'] = 'required';
             } else {
