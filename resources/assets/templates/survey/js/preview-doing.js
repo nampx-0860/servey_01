@@ -526,6 +526,13 @@ $(document).ready(function () {
 
                         result.content = str;
                     }
+
+                    if (questionType == 13) {
+                        result.answer_id = $('.select-value-dropdown').val();
+                        if (result.answer_id != '') {
+                            result.content = $('.select-value-dropdown option:selected').html();
+                        }
+                    }
                 }
                 results.push(result);
             } else {
