@@ -118,6 +118,12 @@
                 'question' => $question,
                 'type' => $question->type,
             ])
+        @elseif ($question->type == config('settings.question_type.dropdown'))
+            @include('clients.survey.edit.elements.dropdown', [
+                'sectionId' => $section->id,
+                'question' => $question,
+                'type' => $question->type,
+            ])
         @endif
     @endforeach
     <li class="end-section" style="display: none;">

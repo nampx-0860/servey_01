@@ -53,6 +53,9 @@
                     @elseif ($question->type == config('settings.question_type.grid'))
                         <span class="fa fa-th grid-quetion-icon"></span>
                         <span class="option-menu-content">@lang('lang.grid')</span>
+                    @elseif ($question->type == config('settings.question_type.dropdown'))
+                        <span class="dropdown">{{ Html::image(asset(config('settings.dropdown_icon')), null, ['class' => '']) }}</span>
+                        <span class="option-menu-content option-grid">@lang('lang.dropdown')</span>
                     @endif
                 </div>
                 <ul class="survey-select-options">
@@ -72,6 +75,10 @@
                     <li data-type="{{ config('settings.question_type.checkboxes') }}" data-url="{{ route('ajax-fetch-checkboxes') }}">
                         <span class="answer-icon checkboxes-answer-icon"></span>
                         <span class="option-menu-content">@lang('lang.checkboxes')</span>
+                    </li>
+                    <li data-type="{{ config('settings.question_type.dropdown') }}" data-url="{{ route('ajax-fetch-dropdown-question') }}" class="clearfix">
+                        <span class="dropdown">{{ Html::image(asset(config('settings.dropdown_icon')), null, ['class' => '']) }}</span>
+                        <span class="option-menu-content option-grid">@lang('lang.dropdown')</span>
                     </li>
                     <hr/>
                     <li data-type="{{ config('settings.question_type.date') }}" data-url="{{ route('ajax-fetch-date') }}">

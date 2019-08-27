@@ -128,8 +128,8 @@ trait SurveyProcesser
                 $temp[] = [
                     'content' => $answerResult->first()->content,
                     'percent' => round(($totalAnswerResults) ?
-                        (double)($count * config('settings.number_100')) / ($totalAnswerResults) :
-                        config('settings.number_0'), config('settings.roundPercent')),
+                        (float) ($count * config('settings.number_100')) / ($totalAnswerResults)
+                        : config('settings.number_0'), config('settings.roundPercent')),
                 ];
             }
         }
@@ -149,7 +149,7 @@ trait SurveyProcesser
         $subQuestions = $question->sub_questions;
 
         if ($totalAnswerResults) {
-            
+
             foreach ($subQuestions as $key => $subQuestion) {
                 $resultOfEachRow = [];
 
@@ -158,7 +158,7 @@ trait SurveyProcesser
                     if ($answerResult->array_content[$key + config('settings.number_1')] == '') {
                         continue;
                     }
-                    $resultOfEachRow[] = (int)$answerResult->array_content[$key + config('settings.number_1')];
+                    $resultOfEachRow[] = (int) $answerResult->array_content[$key + config('settings.number_1')];
                 }
                 $resultOfEachRow = array_count_values($resultOfEachRow);
                 $resultOfEachColumnByRow = [];
@@ -202,8 +202,8 @@ trait SurveyProcesser
                             'answer_type' => config('settings.answer_type.other_option'),
                             'content' => $answerOther->first()->content ? $answerOther->first()->content : trans('result.other'),
                             'percent' => round(($totalAnswerResults) ?
-                                (double)($count * config('settings.number_100')) / ($totalAnswerResults) :
-                                config('settings.number_0'), config('settings.roundPercent')),
+                                (float) ($count * config('settings.number_100')) / ($totalAnswerResults)
+                                : config('settings.number_0'), config('settings.roundPercent')),
                         ];
                     }
                 } else {
@@ -214,8 +214,8 @@ trait SurveyProcesser
                         'answer_type' => config('settings.answer_type.option'),
                         'content' => $answer->content,
                         'percent' => round(($totalAnswerResults) ?
-                            (double)($answerResults * config('settings.number_100')) / ($totalAnswerResults) :
-                            config('settings.number_0'), config('settings.roundPercent')),
+                            (float) ($answerResults * config('settings.number_100')) / ($totalAnswerResults)
+                            : config('settings.number_0'), config('settings.roundPercent')),
                     ];
                 }
             }
@@ -240,10 +240,8 @@ trait SurveyProcesser
 
             if (in_array($section['redirect_id'], $redirectIds, true)) {
                 $sectionData['redirect_id'] = $section['redirect_id'];
-
             } elseif (is_null($section['redirect_id'])) {
                 $sectionData['redirect_id'] = config('settings.section_redirect_id_default');
-
             } else {
                 $sectionData['redirect_id'] = $dataRedirectId[$section['redirect_id']];
             }
@@ -273,7 +271,7 @@ trait SurveyProcesser
             $questionData['title'] = $question['title'];
             $questionData['description'] = $question['description'];
             $questionData['required'] = $question['require'];
-            $questionData['order'] = !empty($question['order']) ? $question['order'] : ++ $orderQuestion;
+            $questionData['order'] = !empty($question['order']) ? $question['order'] : ++$orderQuestion;
             $questionData['update'] = config('settings.survey.question_update.updated');
 
             if (!empty($survey)) {
@@ -511,9 +509,9 @@ trait SurveyProcesser
 
             // if option is only send updated question then update send_update_mails column
             if (in_array($optionUpdate, [
-                    config('settings.option_update.only_send_updated_question_survey'),
-                    config('settings.option_update.dont_send_survey_again'),
-                ])) {
+                config('settings.option_update.only_send_updated_question_survey'),
+                config('settings.option_update.dont_send_survey_again'),
+            ])) {
                 $sendUpdateMails = array_unique(array_merge($inviter->send_update_mails_array, $reInviteMails));
                 $updateData['send_update_mails'] = $this->formatInviteMailsString($sendUpdateMails);
             }
