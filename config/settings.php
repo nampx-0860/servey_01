@@ -340,7 +340,9 @@ return [
     'date_format_vn' => 'DD/MM/YYYY',
     'date_format_en' => 'MM/DD/YYYY',
     'date_format_jp' => 'YYYY/MM/DD',
+    'date_time_format' => 'd-m-Y H:i:s',
     'group_content_result' => '',
+    'current_page' => 1,
 
     /**
      *  Survey edit

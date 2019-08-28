@@ -29,7 +29,7 @@
             @include('clients.profile.survey.element.search')
 
             <div class="table-responsive" id="show-list-surveys">
-                @include('clients.profile.survey.list_survey_owner')
+                @include('clients.profile.survey.list_survey_manage')
             </div>
         </div>
     </div>
