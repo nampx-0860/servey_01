@@ -1347,6 +1347,8 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
                     $resultQuestion = $this->getTextQuestionResult($question, $survey, $userRepo);
                 } elseif ($question->type == config('settings.question_type.grid')) {
                     $resultQuestion = $this->getResultGridQuestion($question, $survey, $userRepo);
+                } elseif ($question->type == config('settings.question_type.dropdown')) {
+                    $resultQuestion = $this->getResultDropdownQuestion($question, $survey, $userRepo, app(ResultInterface::class));
                 } else {
                     if ($question->answers->count()) {
                         $resultQuestion = $this->getResultChoiceQuestion($question, $survey, $userRepo, app(ResultInterface::class));

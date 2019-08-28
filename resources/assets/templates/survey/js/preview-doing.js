@@ -731,29 +731,31 @@ function autoResizeTextarea() {
 // dropdown
 function createDropdown() {
     $('.sel').each(function () {
-        $(this).children('select').css('display', 'none');
-        var $current = $(this);
-        $(this).find('option').each(function (i) {
-            if (i == 0) {
-                $current.prepend($('<div>', {
-                    class: $current.attr('class').replace(/sel/g, 'sel__box')
+        if (!$(this).find('.sel__placeholder').length) {
+            $(this).children('select').css('display', 'none');
+            var $current = $(this);
+            $(this).find('option').each(function (i) {
+                if (i == 0) {
+                    $current.prepend($('<div>', {
+                        class: $current.attr('class').replace(/sel/g, 'sel__box')
+                    }));
+
+                    var placeholder = $(this).text();
+                    $current.prepend($('<span>', {
+                        class: $current.attr('class').replace(/sel/g, 'sel__placeholder'),
+                        text: placeholder,
+                        'data-placeholder': placeholder
+                    }));
+
+                    return;
+                }
+
+                $current.children('div').append($('<span>', {
+                    class: $current.attr('class').replace(/sel/g, 'sel__box__options'),
+                    text: $(this).text()
                 }));
-
-                var placeholder = $(this).text();
-                $current.prepend($('<span>', {
-                    class: $current.attr('class').replace(/sel/g, 'sel__placeholder'),
-                    text: placeholder,
-                    'data-placeholder': placeholder
-                }));
-
-                return;
-            }
-
-            $current.children('div').append($('<span>', {
-                class: $current.attr('class').replace(/sel/g, 'sel__box__options'),
-                text: $(this).text()
-            }));
-        });
+            });
+        }
     });
 
     $('.sel').click(function () {

@@ -186,6 +186,7 @@ trait SurveyProcesser
         $answers = $question->answers();
         $results = $resultRepo->withTrashed()->whereIn('answer_id', $answers->pluck('id')->all());
         $results = $this->getResultsFollowOptionUpdate($survey, $results, $userRepo)->get();
+        dd($results);
         $totalAnswerResults = $results->count();
 
         foreach ($question->answers as $answer) {
@@ -225,6 +226,14 @@ trait SurveyProcesser
             'temp' => $temp,
             'total_answer_results' => $totalAnswerResults,
         ];
+    }
+
+    public function getResultDropdownQuestion($question, $survey, $userRepo, $resultRepo)
+    {
+        $temp = [];
+        $answers = $question->answers();
+        $results = $resultRepo->withTrashed()->whereIn('answer_id', $answers->pluck('id')->all());
+        $results = $this->getResultsFollowOptionUpdate($survey, $results, $userRepo)->get();
     }
 
     // create new sections
