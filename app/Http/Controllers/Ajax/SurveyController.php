@@ -97,7 +97,7 @@ class SurveyController extends Controller
         $data = $request->only('name', 'status', 'privacy');
         $surveys = $this->surveyRepository->getAllSurvey($data);
 
-        $html = view('clients.profile.survey.list_survey_owner', compact('surveys'))->render();
+        $html = view('clients.profile.survey.list_survey_manage', compact('surveys'))->render();
 
         return response()->json([
             'success' => true,
