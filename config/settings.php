@@ -343,6 +343,7 @@ return [
     'date_time_format' => 'd-m-Y H:i:s',
     'group_content_result' => '',
     'current_page' => 1,
+    'limit_feedback_content' => '60',
 
     /**
      *  Survey edit

@@ -419,4 +419,5 @@ return [
     'loading_hide' => 'Loading...',
     'dropdown' => 'Dropdown',
     'dropdown_choice' => 'Select',
+    'date_create' => 'Date create',
 ];
