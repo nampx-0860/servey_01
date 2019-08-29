@@ -2,11 +2,12 @@
     <table class="table table-bordered table-list-survey">
         <thead>
             <tr>
-                <th width="5%" class="text-center">@lang('profile.index')</th>
+                <th class="text-center width-5">@lang('profile.index')</th>
                 <th class="text-center">@lang('lang.name')</th>
                 <th class="text-center">@lang('lang.email')</th>
-                <th width="30%" class="text-center">@lang('lang.feedback_content')</th>
-                <th width="15%"></th>
+                <th class="text-center width-30">@lang('lang.feedback_content')</th>
+                <th class="text-center width-30">@lang('lang.date_create')</th>
+                <th class="width-16"></th>
             </tr>
         </thead>
         <tbody>
@@ -24,7 +25,10 @@
                         </span>
                     </td>
                     <td>
-                        <span class="feedback-content" val="{{ $feedback->content }}">{{ str_limit($feedback->content, 60) }}</span>
+                        <span class="feedback-content" val="{{ $feedback->content }}">{{ str_limit($feedback->content, config('settings.limit_feedback_content')) }}</span>
+                    </td>
+                    <td>
+                        <span class="feedback-content" val="{{ $feedback->created_at }}">{{ date(config('settings.date_time_format'), strtotime($feedback->created_at)) }}</span>
                     </td>
                     <td>
                         <a href="#" class="btn btn-info feedback-detail-btn" data-toggle="tooltip" title="@lang('lang.detail')">

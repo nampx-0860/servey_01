@@ -183,13 +183,13 @@ jQuery(document).ready(function () {
         input.val(Lang.get('lang.option', { index: nextElement.index() + 1 }));
         input.select();
         input.focus();
-        
+
         resetIndexRow(questionId);
         addValidationRuleForAnswer(answerId);
         multipleChoiceSortable(`question_${questionId}`);
     });
 
-    function resetIndexRow(questionId){
+    function resetIndexRow(questionId) {
         $(`#question_${questionId}`).find('.form-row.element-content').find('.multiple-choice-block').find('.form-row').each(function (index) {
             $(this).find('.radio-choice-icon').text(index + 1 + '.');
         });
@@ -1499,6 +1499,8 @@ jQuery(document).ready(function () {
                 maxlength: 255,
                 sectionunique: false,
             });
+
+            return false;
         });
     }
 
@@ -1507,7 +1509,6 @@ jQuery(document).ready(function () {
         $(`#question_${questionId} textarea:regex(name, ^title\\[section_.*\\]\\[question_.*\\]$)`).each(function () {
             $(this).rules('add', {
                 required: true,
-                maxlength: 255,
                 questionunique: false,
             });
         });
@@ -1887,12 +1888,6 @@ jQuery(document).ready(function () {
         $(this).closest('li.form-line').find('.description-input .question-description-input').keyup();
     });
 
-    $('.survey-form').on('keydown', '.question-input', function (e) {
-        if (((e.keyCode || e.which) === 13) && !e.shiftKey) {
-            return false;
-        }
-    });
-
     /**
      * multiple choice
      */
@@ -1937,7 +1932,7 @@ jQuery(document).ready(function () {
             input.select();
             input.focus();
 
-            if($(this).closest('.form-line').data('question-type') == 13){
+            if ($(this).closest('.form-line').data('question-type') == 13) {
                 resetIndexRow(questionId);
             }
 
@@ -2286,6 +2281,8 @@ jQuery(document).ready(function () {
                         $(this).rules('add', {
                             maxlength: 255,
                         });
+
+                        return false;
                     });
 
                     // add validation rules for section and question
@@ -2596,6 +2593,8 @@ jQuery(document).ready(function () {
                         $(this).rules('add', {
                             maxlength: 255,
                         });
+
+                        return false;
                     });
 
                     // add validation rules for section and question

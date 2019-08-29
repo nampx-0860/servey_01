@@ -418,4 +418,5 @@ return [
     'loading_hide' => 'Đang tải...',
     'dropdown' => 'Danh sách',
     'dropdown_choice' => 'Lựa chọn',
+    'date_create' => 'Ngày tạo',
 ];

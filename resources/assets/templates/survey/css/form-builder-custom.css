@@ -4114,12 +4114,20 @@ input[name="quantity-answer"]::-webkit-outer-spin-button, input[type="number"]::
     border-bottom: 1px dotted #333;
 }
 
+.width-30 {
+    width: 30%;
+}
+
 .width-25 {
     width: 25%;
 }
 
 .width-16 {
     width: 16%;
+}
+
+.width-5 {
+    width: 5%;
 }
 
 /* dropdown */
