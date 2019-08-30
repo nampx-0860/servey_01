@@ -83,7 +83,7 @@ class ExportController extends Controller
         try {
             $survey = $this->surveyRepository->getSurveyFromToken($request->token);
             $data = $this->surveyRepository->getResultExport($survey, $request->month);
-            $title = trans('profile.name_survey') . ":" . str_limit($survey->title, config('settings.limit_title_excel'));
+            $title = trans('profile.name_survey') . ":" . $survey->title;
             $orderQuestion = [];
 
             if (!count($survey->sections->where('redirect_id', '!=', config('settings.number_0')))) {
