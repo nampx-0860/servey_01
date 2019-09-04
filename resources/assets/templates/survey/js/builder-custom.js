@@ -4084,7 +4084,11 @@ jQuery(document).ready(function () {
         } else {
             sectionDuplicate = element.closest('.page-section').clone();
             sectionDuplicate.insertAfter(element.closest('.page-section'));
-            refreshIdSectionDuplicate(sectionDuplicate);
+            $(this).closest('ul.page-section').find('.form-line.sort').each(function () {
+                if ($(this).data('question-type') == 11) {
+                    return false;
+                } else refreshIdSectionDuplicate(sectionDuplicate);
+            })
         }
 
         formSortable();

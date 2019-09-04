@@ -213,7 +213,11 @@ $(document).ready(function () {
 
     // delete survey
     $(document).on('click', '#delete-survey', function () {
-        if ($(this).data('survey-status') == 1) {
+        var deleteSurveyCondition = window.location.pathname == '/list-survey'
+            ? $(this).data('survey-status') == 1
+            : $('.btn.hide-div').attr('id') == 'open-survey';
+
+        if (deleteSurveyCondition) {
             alertWarning(
                 { message: Lang.get('lang.warning_close_survey_to_delete') }
             );
