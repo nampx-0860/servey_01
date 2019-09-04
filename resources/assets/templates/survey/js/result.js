@@ -524,7 +524,6 @@ function createSheets(data, valueAddSheet) {
             }
         }
         $('.loading-hide').css('display', 'none');
-        $('#syns-to-sheets').css('display', 'inline-block');
         openInNewTab(response.result['spreadsheetUrl']);
     }, function (reason) {
         console.error('error: ' + reason.result.error.message);
@@ -653,5 +652,9 @@ function openInNewTab(href) {
 $(document).on('click', '#syns-to-sheets', function (event) {
     $('#syns-to-sheets').css('display', 'none');
     $('.loading-hide').css('display', 'inline-block');
+    setTimeout(function () {
+        $('#syns-to-sheets').css('display', 'inline-block');
+        $('.loading-hide').css('display', 'none');
+    }, 5000);
     getDataToSheets();
 });
