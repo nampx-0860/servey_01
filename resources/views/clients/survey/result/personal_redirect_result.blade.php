@@ -83,6 +83,9 @@
                     @case (config('settings.question_type.multiple_choice'))
                         @include ('clients.survey.result.elements.multiple-choice')
                         @break
+                    @case (config('settings.question_type.dropdown'))
+                        @include ('clients.survey.result.elements.dropdown')
+                        @break
                     @case (config('settings.question_type.redirect'))
                         @include ('clients.survey.result.elements.multiple-choice')
                         <div class="item-answer">

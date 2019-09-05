@@ -204,6 +204,7 @@ return [
             'updated' => 1,
         ],
         'option' => [
+            'default' => 0,
             'first' => 1,
         ],
         'members' => [
