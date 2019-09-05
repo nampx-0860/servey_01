@@ -4147,7 +4147,7 @@ input[name="quantity-answer"]::-webkit-outer-spin-button, input[type="number"]::
     content: '\f063';
     font-family: 'FontAwesome';
     font-size: 2em;
-    color: #FFF;
+    color: #000;
     right: 20px;
     top: calc(50% - 0.5em);
 }

@@ -224,7 +224,15 @@
                                         @if ($result['question']->answers->count())
                                             <div class="answer-result chart-result-answer checkboxes-result"
                                                 id="{{ $result['question']->id }}"
-                                                data="{{ json_encode($result['answers']) }}"></div>
+                                                data="{{ json_encode($result['answers']) }}">
+                                            </div>
+                                        @endif
+                                    @elseif ($result['question_type'] == config('settings.question_type.dropdown'))
+                                        @if ($result['question']->answers->count())
+                                            <div class="answer-result chart-result-answer multiple-choice-result"
+                                                id="{{ $result['question']->id }}"
+                                                data="{{ json_encode($result['answers']) }}">
+                                            </div>
                                         @endif
                                     @endif
                                 @else
