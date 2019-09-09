@@ -1561,4 +1561,13 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
 
         return $newVals;
     }
+
+    public function updateGoogleToken($token, $surveyId)
+    {
+        $updateGoogleToken = DB::table('surveys')->where('id', $surveyId)->update([
+            'google_token' => $token,
+        ]);
+
+        return $updateGoogleToken;
+    }
 }

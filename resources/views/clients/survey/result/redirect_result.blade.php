@@ -104,6 +104,12 @@
                                 id="{{ $result['question']->id }}"
                                 data="{{ json_encode($result['answers']) }}"></div>
                         @endif
+                    @elseif ($result['question_type'] == config('settings.question_type.dropdown'))
+                        @if ($result['question']->answers->count())
+                            <div class="answer-result sub-multiple-choice-result"
+                                id="{{ $result['question']->id }}"
+                                data="{{ json_encode($result['answers']) }}"></div>
+                        @endif
                     @endif
                 @else
                     <span class="no-answer">@lang('result.there_is_no_result')</span>

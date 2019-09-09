@@ -42,6 +42,7 @@
                             data-api-key="{{ config('settings.api_key') }}"
                             data-client-id="{{ config('settings.clientID') }}"
                             data-google-scope="{{ config('settings.google_scope') }}"
+                            data-google-token-url="{{ route('change-google-token') }}"
                             data-url="{{ route('syns-to-sheets') }}"
                             data-token="{{ $survey->token }}"
                             title="@lang('lang.syns_to_sheets')">

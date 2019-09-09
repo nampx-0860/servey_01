@@ -81,4 +81,6 @@ interface SurveyInterface
     public function getNormalDataToSheet($data, $survey, $title, $orderQuestion);
 
     public function getRedirectDataToSheet($data, $survey, $title);
+
+    public function updateGoogleToken($token, $surveyId);
 }
