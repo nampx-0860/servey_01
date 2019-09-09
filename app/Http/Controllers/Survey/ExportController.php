@@ -97,7 +97,9 @@ class ExportController extends Controller
 
             $surveyInfo = [
                 'title' => str_limit($survey->title, config('settings.limit_title_excel')),
-                'redirect' => []
+                'googleToken' => $survey->google_token,
+                'surveyId' => $survey->id,
+                'redirect' => [],
             ];
 
             if (isset($data['questions'])) {

@@ -516,6 +516,8 @@ function createSheets(data, valueAddSheet) {
     var request = gapi.client.sheets.spreadsheets.create({}, spreadsheetBody);
 
     request.then(function (response) {
+        updateGoogleToken(response.result['spreadsheetId'], data.surveyInfo.surveyId);
+
         if (data.surveyInfo.redirect.length == 0) {
             putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title'], response.result['spreadsheetUrl']);
         } else {
@@ -528,6 +530,23 @@ function createSheets(data, valueAddSheet) {
     }, function (reason) {
         console.error('error: ' + reason.result.error.message);
     });
+}
+
+function updateGoogleToken(token, surveyId) {
+    var url = $('#syns-to-sheets').data('google-token-url');
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            token: token,
+            surveyId: surveyId,
+        },
+    })
+        .done(function (data) {
+            console.log(data);
+        });
 }
 
 function putDataIntoSheets(data, ssID, surveyTitle) {
@@ -638,7 +657,9 @@ function getDataToSheets() {
         },
     })
         .done(function (data) {
-            handleSignInClick(data);
+            data.surveyInfo.googleToken != null
+                ? openInNewTab('https://docs.google.com/spreadsheets/d/' + data.surveyInfo.googleToken)
+                : handleSignInClick(data);
         });
 }
 

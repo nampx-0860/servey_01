@@ -62,8 +62,8 @@ class ManagementSurvey extends Controller
                 'success' => false,
             ]);
         }
-        
-        $survey = $this->surveyRepository->getSurveyFromTokenManage($tokenManage); 
+
+        $survey = $this->surveyRepository->getSurveyFromTokenManage($tokenManage);
         $results = $this->getOverview($survey);
 
         $html = view('clients.survey.management.overview', compact('results'))->render();
@@ -85,7 +85,7 @@ class ManagementSurvey extends Controller
         if (Session::has('url_current')) {
             Session::forget('url_current');
         }
-        
+
         $survey = $this->surveyRepository->getSurvey($token);
         // at line 42 of file app/Traits/DoSurvey.php
         $data = $this->getFirstSectionSurvey($survey);
@@ -181,7 +181,7 @@ class ManagementSurvey extends Controller
                 'success' => false,
             ]);
         }
-        
+
         DB::beginTransaction();
         try {
             $survey = $this->surveyRepository->withTrashed()->where('token_manage', $tokenManage)->first();
@@ -239,8 +239,6 @@ class ManagementSurvey extends Controller
                 'message' => ($e->getCode() == 403) ? trans('lang.not_permisstion_message') : trans('lang.process_failed'),
             ];
         }
-
-        
     }
 
     public function updateTokenManageSurvey(UpdateTokenManageRequest $request)
@@ -280,7 +278,7 @@ class ManagementSurvey extends Controller
             ];
         }
     }
-    
+
     public function cloneSurvey(Request $request, $tokenManage)
     {
         if (!$request->ajax()) {
@@ -288,7 +286,7 @@ class ManagementSurvey extends Controller
                 'success' => false,
             ]);
         }
-        
+
         DB::beginTransaction();
         try {
             $survey = $this->surveyRepository->getSurveyForClone($tokenManage);
@@ -301,6 +299,33 @@ class ManagementSurvey extends Controller
                 'success' => true,
                 'message' => trans('lang.clone_survey_success'),
                 'redirect' => route('survey.management', $newSurvey->token_manage),
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+
+            return response()->json([
+                'success' => false,
+                'message' => ($e->getCode() == 403) ? trans('lang.not_permisstion_message') : trans('lang.process_failed'),
+            ]);
+        }
+    }
+
+    public function updateGoogleToken(Request $request)
+    {
+        if (!$request->ajax()) {
+            return response()->json([
+                'success' => false,
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            $this->surveyRepository->updateGoogleToken($request->token, $request->surveyId);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
             ]);
         } catch (Exception $e) {
             DB::rollback();

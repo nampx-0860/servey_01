@@ -251,6 +251,8 @@ Route::group(['namespace' => 'Ajax', 'prefix' => 'ajax'], function () {
         ->name('change-token-manage');
     Route::post('status-invite', 'SurveyController@getStatusInvite')
         ->name('survey.status-invite');
+    Route::post('change-google-token', 'ManagementSurvey@updateGoogleToken')
+        ->name('change-google-token');
 });
 
 Route::get('/languages', 'LanguageController@index')->name('set-language');
