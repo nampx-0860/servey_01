@@ -105,7 +105,11 @@ trait SurveyProcesser
             $sendUpdateMails = !empty($inviter) ? $inviter->send_update_mails_array : [];
             $usersSendUpdateId = $userRepo->whereIn('email', $sendUpdateMails)->pluck('id')->all();
 
-            $results = $results->whereNotIn('user_id', $usersSendUpdateId);
+            $results = $results->where(function ($query) use ($usersSendUpdateId) {
+                $query->whereNotIn('user_id', $usersSendUpdateId)->orWhere(function ($query) {
+                    $query->whereNull('user_id')->whereNotNull('client_ip');
+                });
+            });
         }
 
         return $results;
