@@ -519,7 +519,7 @@ function createSheets(data, valueAddSheet) {
         updateGoogleToken(response.result['spreadsheetId'], data.surveyInfo.surveyId);
 
         if (data.surveyInfo.redirect.length == 0) {
-            putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title'], response.result['spreadsheetUrl']);
+            putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title']);
         } else {
             for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
                 putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data.surveyInfo.redirect[i]);
@@ -588,56 +588,63 @@ function handleClientLoad() {
     gapi.load('client:auth2', initClient);
 }
 
-function updateSignInStatus(isSignedIn) { //function này không có thì API k chạy nhưng lại k xử lý logic ở đây
+function updateSignInStatus(isSignedIn) {
     isSignedIn ? console.log('Signin Success') : console.log('Signin Fail');
 }
 
 function handleSignInClick(data) {
-    gapi.auth2.getAuthInstance().signIn()
-        .then(function (response) {
-            var valueAddSheet = []
-            var formatSheet = [];
-            if (data['surveyInfo']['redirect'].length == 0) {
-                valueAddSheet.push({
-                    "properties": {
-                        "sheetId": 0,
-                        "title": data['surveyInfo']['title'],
-                    }
-                })
-                for (var i = 0; i <= 3; i++) {
-                    formatSheet.push({
-                        "sheetId": 0,
-                        "startRowIndex": i,
-                        "endRowIndex": i + 1,
-                    })
-                }
-                valueAddSheet.push({
-                    "merges": formatSheet,
-                })
-            } else {
-                for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+    if (data.surveyInfo.googleToken != null) {
+        gapi.auth2.getAuthInstance().signIn()
+            .then(function (response) {
+                updateDataToSheets(data);
+            });
+    } else {
+        gapi.auth2.getAuthInstance().signIn()
+            .then(function (response) {
+                var valueAddSheet = []
+                var formatSheet = [];
+                if (data['surveyInfo']['redirect'].length == 0) {
                     valueAddSheet.push({
                         "properties": {
-                            "sheetId": i,
-                            "title": data.surveyInfo.redirect[i],
+                            "sheetId": 0,
+                            "title": data['surveyInfo']['title'],
                         }
                     })
-                }
-                for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-                    for (var j = 0; j <= 3; j++) {
+                    for (var i = 0; i <= 3; i++) {
                         formatSheet.push({
-                            "sheetId": i,
-                            "startRowIndex": j,
-                            "endRowIndex": j + 1,
+                            "sheetId": 0,
+                            "startRowIndex": i,
+                            "endRowIndex": i + 1,
                         })
                     }
+                    valueAddSheet.push({
+                        "merges": formatSheet,
+                    })
+                } else {
+                    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                        valueAddSheet.push({
+                            "properties": {
+                                "sheetId": i,
+                                "title": data.surveyInfo.redirect[i],
+                            }
+                        })
+                    }
+                    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                        for (var j = 0; j <= 3; j++) {
+                            formatSheet.push({
+                                "sheetId": i,
+                                "startRowIndex": j,
+                                "endRowIndex": j + 1,
+                            })
+                        }
+                    }
+                    valueAddSheet.push({
+                        "merges": formatSheet,
+                    })
                 }
-                valueAddSheet.push({
-                    "merges": formatSheet,
-                })
-            }
-            createSheets(data, valueAddSheet);
-        });
+                createSheets(data, valueAddSheet);
+            });
+    }
 }
 
 function handleSignOutClick() {
@@ -657,10 +664,44 @@ function getDataToSheets() {
         },
     })
         .done(function (data) {
-            data.surveyInfo.googleToken != null
-                ? openInNewTab('https://docs.google.com/spreadsheets/d/' + data.surveyInfo.googleToken)
-                : handleSignInClick(data);
+            handleSignInClick(data);
         });
+}
+
+function updateDataToSheets(data) {
+    openInNewTab('https://docs.google.com/spreadsheets/d/' + data.surveyInfo.googleToken);
+    var googleToken = data.surveyInfo.googleToken;
+
+    if (data.surveyInfo.redirect.length == 0) {
+        clearDataSheets(googleToken, data.surveyInfo.title);
+        putDataIntoSheets(data.valueSheets, data.surveyInfo.googleToken, data.surveyInfo.title);
+    } else {
+        for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+            clearDataSheets(googleToken, data.surveyInfo.redirect[i]);
+        }
+        setTimeout(() => {
+            for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                putDataIntoSheets(data.valueSheets, data.surveyInfo.googleToken, data.surveyInfo.redirect[i]);
+            }
+        }, 1000);
+
+    }
+}
+
+function clearDataSheets(googleToken, title) {
+    var params = {
+        spreadsheetId: googleToken,
+        range: title,
+    };
+
+    var clearValuesRequestBody = {};
+
+    var request = gapi.client.sheets.spreadsheets.values.clear(params, clearValuesRequestBody);
+    request.then(function (response) {
+        console.log(response.result);
+    }, function (reason) {
+        console.error('error: ' + reason.result.error.message);
+    });
 }
 
 function openInNewTab(href) {
