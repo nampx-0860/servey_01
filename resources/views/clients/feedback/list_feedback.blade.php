@@ -16,12 +16,12 @@
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>
                         <span data-toggle="tooltip" title="{{ $feedback->name }}" class="feedback-name" val="{{ $feedback->name }}">
-                            {{ $feedback->name }}
+                            {{ str_limit($feedback->name, config('settings.limit_feedback_name')) }}
                         </span>
                     </td>
                     <td>
                         <span data-toggle="tooltip" title="{{ $feedback->email }}" class="feedback-email" val="{{ $feedback->email }}">
-                            {{ $feedback->email }}
+                            {{ str_limit($feedback->email, config('settings.limit_feedback_name')) }}
                         </span>
                     </td>
                     <td>
@@ -30,7 +30,7 @@
                     <td>
                         <span class="feedback-content" val="{{ $feedback->created_at }}">{{ date(config('settings.date_time_format'), strtotime($feedback->created_at)) }}</span>
                     </td>
-                    <td>
+                    <td class="feedback-option">
                         <a href="#" class="btn btn-info feedback-detail-btn" data-toggle="tooltip" title="@lang('lang.detail')">
                             <i class="fa fa-eye" aria-hidden="true"></i>
                         </a>

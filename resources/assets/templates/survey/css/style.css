@@ -4529,3 +4529,12 @@ span>div.draggable-area {
     height: 24px;
     fill: #000000;
 }
+
+.feedback-option {
+    display: flex;
+    border: none !important;
+}
+
+.delete-feedback-btn {
+    margin-left: 5px;
+}
