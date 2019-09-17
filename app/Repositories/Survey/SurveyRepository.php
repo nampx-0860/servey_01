@@ -1420,39 +1420,52 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
 
     public function getQuestionToSheet($groupQuestion, $questions)
     {
+        $arrIndexRedirectQuestion = [];
         foreach ($groupQuestion as $question) {
             if (!in_array($question->type, [
                 config('settings.question_type.title'),
                 config('settings.question_type.image'),
                 config('settings.question_type.video'),
             ])) {
-                if ($question->settings->first()->key == config('settings.question_type.linear_scale')) {
-                    $settingValue = $question->setting_value;
-                    $linearQuestion = $question['title'] . ' ( ' . $settingValue->min_value . ' = ' . $settingValue->min_content . ' , ' . $settingValue->max_value . ' = ' . $settingValue->max_content . ' )';
+                if ($question->section->redirect_id == config('settings.number_0')) {
+                    if ($question->settings->first()->key == config('settings.question_type.linear_scale')) {
+                        $settingValue = $question->setting_value;
+                        $linearQuestion = $question['title'] . ' ( ' . $settingValue->min_value . ' = ' . $settingValue->min_content . ' , ' . $settingValue->max_value . ' = ' . $settingValue->max_content . ' )';
 
-                    array_push($questions, $linearQuestion);
-                } elseif ($question->settings->first()->key == config('settings.question_type.grid')) {
-                    $options = json_decode($question->settings->first()->value, true);
-                    $strOption = '';
+                        array_push($questions, $linearQuestion);
+                    } elseif ($question->settings->first()->key == config('settings.question_type.grid')) {
+                        $options = json_decode($question->settings->first()->value, true);
+                        $strOption = '';
 
-                    foreach ($options as $option) {
-                        $strOption = $strOption . ' ( ' . $option . ' )';
+                        foreach ($options as $option) {
+                            $strOption = $strOption . ' ( ' . $option . ' )';
+                        }
+
+                        array_push($questions, $question->title . $strOption);
+                    } else {
+
+                        array_push($questions, $question['title']);
                     }
-
-                    array_push($questions, $question->title . $strOption);
-                } else {
-
-                    array_push($questions, $question['title']);
                 }
+            }
+            if ($question->type == config('settings.question_type.redirect')) {
+                array_push($arrIndexRedirectQuestion, count($questions) - config('settings.number_1'));
+                array_push($questions, '');
             }
         }
 
-        return $questions;
+        return [
+            'questions' => $questions,
+            'indexRedirectQuestion' => $arrIndexRedirectQuestion,
+        ];
     }
 
     public function getResultToSheet($data, $survey, $newVals, $orderQuestion = '')
     {
         if (count($data['results'])) {
+            $arrRedirect = [];
+            $indexRedirect = [];
+
             foreach ($data['results'] as $result) {
                 $results = [];
                 $result = $result->sortBy('order')->sortBy('section_order');
@@ -1464,7 +1477,6 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
                         $finalResults[$value] = $groupByResults[$value];
                     }
                 } else $finalResults = $result->groupBy('question_id');
-
                 array_push($results, $result->first()->created_at->toDateTimeString());
 
                 if ($data['requiredSurvey'] != config('settings.survey_setting.answer_required.none')) {
@@ -1472,15 +1484,31 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
                 }
 
                 foreach ($finalResults as $answers) {
-                    if ($answers->count() == 1) {
-                        if ($answers->first()->question->type == config('settings.question_type.grid')) {
+                    if ($answers->count() == config('settings.number_1'))
+                        if ($answers->first()->question->type == config('settings.question_type.redirect'))
+                            $arrRedirect[$answers->first()->content_answer] = config('settings.number_1');
+                }
+
+                foreach ($finalResults as $answers) {
+                    if ($answers->count() == config('settings.number_1')) {
+                        $redirectSectionId = $answers->first()->question->section->redirect_id;
+                        if ($answers->first()->question->type != config('settings.question_type.grid')) {
+                            $redirectSectionId == config('settings.number_0')
+                                ? array_push($results, $answers->first()->content_answer)
+                                : (array_key_exists($results[count($results) - config('settings.number_1')], $arrRedirect)
+                                    ? array_push($results, $answers->first()->question->title . ' : ' . $answers->first()->content_answer)
+                                    : $results[count($results) - config('settings.number_1')] = $results[count($results) - config('settings.number_1')] . " \n"
+                                    . $answers->first()->question->title . ' : ' . $answers->first()->content_answer);
+                            if ($answers->first()->question->type == config('settings.question_type.redirect')) array_push($indexRedirect, count($results));
+                        } else {
                             $subQuestions = $answers->first()->question->sub_questions;
                             $subOptions = json_decode($answers->first()->question->settings->first()->value);
                             $gridResult = json_decode($answers->first()->content, true);
                             $strGrid = '';
 
                             foreach ($subQuestions as $key => $subQuestion) {
-                                $indexQuestion = $key + 1;
+                                $indexQuestion = $key + config('settings.number_1');
+
                                 foreach ($subOptions as $key => $subOption) {
                                     if ($gridResult[$indexQuestion] == ($key + 1)) {
                                         $gridAnswer = ' [ ' . $subQuestion .  ':' . $subOption . ' ] ';
@@ -1488,18 +1516,18 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
                                     }
                                 }
                             }
-
-                            array_push($results, $strGrid);
-                        } else {
-                            array_push($results, $answers->first()->content_answer);
+                            $redirectSectionId == config('settings.number_0')
+                                ? array_push($results, $strGrid)
+                                : (array_key_exists($results[count($results) - config('settings.number_1')], $arrRedirect)
+                                    ? array_push($results, $answers->first()->question->title . ' : ' . $strGrid)
+                                    : $results[count($results) - 1] = $results[count($results) - 1] . " \n"
+                                    . $answers->first()->question->title . ' : ' . $strGrid);
                         }
                     } else {
                         array_push($results, $answers->implode('content_answer', ', '));
                     }
                 }
-                $orderQuestion != ''
-                    ? array_push($newVals[str_limit($survey->title, config('settings.limit_title_excel'))], $results)
-                    : array_push($newVals[str_limit($data['title'], config('settings.limit_title_excel'))], $results);
+                array_push($newVals, $results);
             }
         }
 
@@ -1537,29 +1565,33 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
 
     public function getRedirectDataToSheet($data, $survey, $title)
     {
-        foreach ($data as $dataRedirect) {
-            $questions = [trans('lang.timestamps')];
+        $newVals = [
+            [trans('lang.sun_asterisk_vn')],
+            [$title],
+            [trans('lang.date_create') . ':' . $survey->created_at],
+            [],
+        ];
+        $questions = [trans('lang.timestamps')];
 
+        foreach ($data as $dataRedirect) {
             if ($dataRedirect['requiredSurvey'] != config('settings.survey_setting.answer_required.none')) {
                 array_push($questions, trans('lang.email'));
             }
-
-            $newVals[str_limit($dataRedirect['title'], config('settings.limit_title_excel'))] = [
-                [trans('lang.sun_asterisk_vn')],
-                [$title],
-                [trans('lang.date_create') . ':' . $survey->created_at],
-                [],
-            ];
-            $questions = $this->getQuestionToSheet($dataRedirect['questions'], $questions);
-
-            array_push($newVals[str_limit($dataRedirect['title'], config('settings.limit_title_excel'))], $questions);
+            $newArrQuestion = $this->getQuestionToSheet($dataRedirect['questions'], $questions);
+            $questions = $newArrQuestion['questions'];
+            $indexRedirectQuestion = $newArrQuestion['indexRedirectQuestion'];
+            break;
         }
+        array_push($newVals, $questions);
 
         foreach ($data as $dataRedirect) {
             $newVals = $this->getResultToSheet($dataRedirect, $survey, $newVals);
         }
 
-        return $newVals;
+        return [
+            'newVals' => $newVals,
+            'indexRedirectQuestion' => $indexRedirectQuestion,
+        ];
     }
 
     public function updateGoogleToken($token, $surveyId)

@@ -99,22 +99,20 @@ class ExportController extends Controller
                 'title' => str_limit($survey->title, config('settings.limit_title_excel')),
                 'googleToken' => $survey->google_token,
                 'surveyId' => $survey->id,
-                'redirect' => [],
             ];
 
             if (isset($data['questions'])) {
                 $newVals = $this->surveyRepository->getNormalDataToSheet($data, $survey, $title, $orderQuestion);
             } else {
-                foreach ($data as $dataRedirect) {
-                    array_push($surveyInfo['redirect'], $dataRedirect['title']);
-                }
-
-                $newVals = $this->surveyRepository->getRedirectDataToSheet($data, $survey, $title);
+                $arrNewVals = $this->surveyRepository->getRedirectDataToSheet($data, $survey, $title);
+                $newVals = $arrNewVals['newVals'];
+                $indexRedirectQuestion = $arrNewVals['indexRedirectQuestion'];
             }
 
             return $data = [
                 'valueSheets' => $newVals,
                 'surveyInfo' => $surveyInfo,
+                'indexRedirectQuestion' => $indexRedirectQuestion,
             ];
         } catch (Exception $e) {
 

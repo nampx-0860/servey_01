@@ -507,6 +507,10 @@ function escapeSpecialChars(jsonString) {
 
 // Syns to Google Sheets
 function createSheets(data, valueAddSheet) {
+    var maxIndexBorder = {
+        'maxRow': data.valueSheets[4].length,
+        'maxColum': data.valueSheets.length,
+    };
     var spreadsheetBody = {
         "properties": {
             "title": data['surveyInfo']['title'],
@@ -517,16 +521,8 @@ function createSheets(data, valueAddSheet) {
 
     request.then(function (response) {
         updateGoogleToken(response.result['spreadsheetId'], data.surveyInfo.surveyId);
-
-        if (data.surveyInfo.redirect.length == 0) {
-            formatDataSheet(response.result['spreadsheetId']);
-            putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title']);
-        } else {
-            for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-                formatDataSheet(response.result['spreadsheetId'], i);
-                putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data.surveyInfo.redirect[i]);
-            }
-        }
+        formatDataSheet(response.result['spreadsheetId'], data.indexRedirectQuestion, maxIndexBorder);
+        putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title']);
         $('.loading-hide').css('display', 'none');
         openInNewTab(response.result['spreadsheetUrl']);
     }, function (reason) {
@@ -560,7 +556,7 @@ function putDataIntoSheets(data, ssID, surveyTitle) {
         valueInputOption: 'RAW',
     };
     var valueRangeBody = {
-        "values": data[surveyTitle]
+        "values": data
     };
     var request = gapi.client.sheets.spreadsheets.values.update(params, valueRangeBody);
 
@@ -606,45 +602,23 @@ function handleSignInClick(data) {
             .then(function (response) {
                 var valueAddSheet = []
                 var formatSheet = [];
-                if (data['surveyInfo']['redirect'].length == 0) {
-                    valueAddSheet.push({
-                        "properties": {
-                            "sheetId": 0,
-                            "title": data['surveyInfo']['title'],
-                        }
-                    })
-                    for (var i = 0; i <= 3; i++) {
-                        formatSheet.push({
-                            "sheetId": 0,
-                            "startRowIndex": i,
-                            "endRowIndex": i + 1,
-                        })
+                valueAddSheet.push({
+                    "properties": {
+                        "sheetId": 0,
+                        "title": data['surveyInfo']['title'],
                     }
-                    valueAddSheet.push({
-                        "merges": formatSheet,
-                    })
-                } else {
-                    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-                        valueAddSheet.push({
-                            "properties": {
-                                "sheetId": i,
-                                "title": data.surveyInfo.redirect[i],
-                            }
-                        })
-                    }
-                    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-                        for (var j = 0; j <= 3; j++) {
-                            formatSheet.push({
-                                "sheetId": i,
-                                "startRowIndex": j,
-                                "endRowIndex": j + 1,
-                            })
-                        }
-                    }
-                    valueAddSheet.push({
-                        "merges": formatSheet,
+                })
+                for (var i = 0; i <= 3; i++) {
+                    formatSheet.push({
+                        "sheetId": 0,
+                        "startRowIndex": i,
+                        "endRowIndex": i + 1,
                     })
                 }
+                valueAddSheet.push({
+                    "merges": formatSheet,
+                })
+
                 createSheets(data, valueAddSheet);
             });
     }
@@ -675,16 +649,11 @@ function updateDataToSheets(data) {
     var googleToken = data.surveyInfo.googleToken;
     openInNewTab('https://docs.google.com/spreadsheets/d/' + googleToken);
 
-    if (data.surveyInfo.redirect.length == 0) {
-        clearDataSheets(googleToken, data.surveyInfo.title);
-        setTimeout(() => {
-            putDataIntoSheets(data.valueSheets, googleToken, data.surveyInfo.title);
-        }, 1000);
-    } else {
-        Promise.all(promiseLoopClearData(data, googleToken)).then(function (value) {
-            promiseLoopPutData(data, googleToken);
-        });
-    }
+    clearDataSheets(googleToken, data.surveyInfo.title);
+    setTimeout(() => {
+        putDataIntoSheets(data.valueSheets, googleToken, data.surveyInfo.title);
+    }, 1000);
+
 }
 
 //xu ly bat dong bo
@@ -752,22 +721,48 @@ $(document).on('click', '#syns-to-sheets', function (event) {
 });
 
 //format cell google sheets
-function formatDataSheet(spreadsheetId, sheetId) {
+function formatDataSheet(spreadsheetId, indexRedirectQuestion, maxIndexBorder) {
+    var sheetId = 0;
+    var arrFormat = [];
+    var fontsize = 30;
     var params = {
         spreadsheetId: spreadsheetId,
     };
 
-    var batchUpdateSpreadsheetRequestBody = {
-        requests: [{
+    for (var i = 0; i <= 3; i++) {
+        var fontsize = fontsize - 6;
+        arrFormat.push({
             "repeatCell": {
                 "range": {
                     "sheetId": sheetId,
-                    "startRowIndex": 0,
-                    "endRowIndex": 5
+                    "startRowIndex": i,
+                    "endRowIndex": i + 1,
                 },
                 "cell": {
                     "userEnteredFormat": {
                         "horizontalAlignment": "LEFT",
+                        "textFormat": {
+                            "fontSize": fontsize,
+                            "bold": true
+                        }
+                    }
+                },
+                "fields": "userEnteredFormat(horizontalAlignment,textFormat)"
+            }
+        });
+    }
+
+    setTimeout(() => {
+        arrFormat.push({
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheetId,
+                    "startRowIndex": 4,
+                    "endRowIndex": 5,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "horizontalAlignment": "CENTER",
                         "textFormat": {
                             "fontSize": 12,
                             "bold": true
@@ -776,11 +771,83 @@ function formatDataSheet(spreadsheetId, sheetId) {
                 },
                 "fields": "userEnteredFormat(horizontalAlignment,textFormat)"
             }
-        }],
-    };
+        }, {
+            "repeatCell": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 5,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "verticalAlignment": "MIDDLE"
+                    }
+                },
+                "fields": "userEnteredFormat(verticalAlignment)"
+            }
+        }, {
+            "updateBorders": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 4,
+                    "endRowIndex": maxIndexBorder.maxColum,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": maxIndexBorder.maxRow,
+                },
+                "innerHorizontal": {
+                    "width": 1,
+                    "style": "SOLID"
 
-    var request = gapi.client.sheets.spreadsheets.batchUpdate(params, batchUpdateSpreadsheetRequestBody);
-    request.then(function (response) {
-    }, function (reason) {
-    });
+                },
+                "innerVertical": {
+                    "style": "SOLID",
+                    "width": 1
+
+                },
+                "top": {
+                    "width": 1,
+                    "style": "SOLID"
+
+                },
+                "right": {
+                    "style": "SOLID",
+                    "width": 1
+
+                },
+                "bottom": {
+                    "width": 1,
+                    "style": "SOLID"
+
+                }
+
+            }
+        });
+    }, 300);
+
+    setTimeout(() => {
+        for (var i = 0; i <= indexRedirectQuestion.length - 1; i++) {
+            arrFormat.push({
+                "mergeCells": {
+                    "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 4,
+                        "endRowIndex": 5,
+                        "startColumnIndex": indexRedirectQuestion[i],
+                        "endColumnIndex": indexRedirectQuestion[i] + 2,
+                    },
+                    "mergeType": "MERGE_ALL"
+                }
+            });
+        }
+
+        var batchUpdateSpreadsheetRequestBody = {
+            requests: arrFormat,
+        };
+
+        var request = gapi.client.sheets.spreadsheets.batchUpdate(params, batchUpdateSpreadsheetRequestBody);
+        request.then(function (response) {
+            console.log(response.result);
+        }, function (reason) {
+            console.error('error: ' + reason.result.error.message);
+        });
+    }, 500);
 }
