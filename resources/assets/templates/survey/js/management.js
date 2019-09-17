@@ -23,6 +23,11 @@ $(document).ready(function () {
             var end_date = document.getElementById("chart-personal-end-date").value;
             $('#chart-personal-start-date').datepicker('setEndDate', end_date);
         }
+        $('#chart-start-date, #chart-end-date, #chart-personal-start-date, #chart-personal-end-date').on('click', function () {
+            if ($(this).val() == '') {
+                $(this).datepicker('setDate', new Date());
+            }
+        })
     }
 
     // get overview

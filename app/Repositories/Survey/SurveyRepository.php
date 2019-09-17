@@ -1519,7 +1519,7 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
             str_limit($survey->title, config('settings.limit_title_excel')) => [
                 [trans('lang.sun_asterisk_vn')],
                 [$title],
-                [trans('lang.date_create') . $survey->created_at],
+                [trans('lang.date_create') . ':' . $survey->created_at],
                 [],
             ]
         ];
@@ -1547,7 +1547,7 @@ class SurveyRepository extends BaseRepository implements SurveyInterface
             $newVals[str_limit($dataRedirect['title'], config('settings.limit_title_excel'))] = [
                 [trans('lang.sun_asterisk_vn')],
                 [$title],
-                [trans('lang.date_create') . $survey->created_at],
+                [trans('lang.date_create') . ':' . $survey->created_at],
                 [],
             ];
             $questions = $this->getQuestionToSheet($dataRedirect['questions'], $questions);
