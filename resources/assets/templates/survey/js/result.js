@@ -519,9 +519,11 @@ function createSheets(data, valueAddSheet) {
         updateGoogleToken(response.result['spreadsheetId'], data.surveyInfo.surveyId);
 
         if (data.surveyInfo.redirect.length == 0) {
+            formatDataSheet(response.result['spreadsheetId']);
             putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data['surveyInfo']['title']);
         } else {
             for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+                formatDataSheet(response.result['spreadsheetId'], i);
                 putDataIntoSheets(data['valueSheets'], response.result['spreadsheetId'], data.surveyInfo.redirect[i]);
             }
         }
@@ -549,6 +551,7 @@ function updateGoogleToken(token, surveyId) {
         });
 }
 
+//update data google sheets
 function putDataIntoSheets(data, ssID, surveyTitle) {
     var range = surveyTitle;
     var params = {
@@ -669,25 +672,52 @@ function getDataToSheets() {
 }
 
 function updateDataToSheets(data) {
-    openInNewTab('https://docs.google.com/spreadsheets/d/' + data.surveyInfo.googleToken);
     var googleToken = data.surveyInfo.googleToken;
+    openInNewTab('https://docs.google.com/spreadsheets/d/' + googleToken);
 
     if (data.surveyInfo.redirect.length == 0) {
         clearDataSheets(googleToken, data.surveyInfo.title);
-        putDataIntoSheets(data.valueSheets, data.surveyInfo.googleToken, data.surveyInfo.title);
-    } else {
-        for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-            clearDataSheets(googleToken, data.surveyInfo.redirect[i]);
-        }
         setTimeout(() => {
-            for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
-                putDataIntoSheets(data.valueSheets, data.surveyInfo.googleToken, data.surveyInfo.redirect[i]);
-            }
+            putDataIntoSheets(data.valueSheets, googleToken, data.surveyInfo.title);
         }, 1000);
-
+    } else {
+        Promise.all(promiseLoopClearData(data, googleToken)).then(function (value) {
+            promiseLoopPutData(data, googleToken);
+        });
     }
 }
 
+//xu ly bat dong bo
+function promiseLoopClearData(data, googleToken) {
+    let listPromises = [];
+
+    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+        listPromises.push(loopClearData(data, googleToken, data.surveyInfo.redirect[i]));
+    }
+
+    return listPromises;
+}
+
+function promiseLoopPutData(data, googleToken) {
+    for (var i = 0; i <= data.surveyInfo.redirect.length - 1; i++) {
+        loopPutData(data, googleToken, data.surveyInfo.redirect[i]);
+    }
+}
+
+function loopClearData(data, googleToken, indexTitle) {
+    return new Promise((resolve, reject) => {
+        setTimeout(function () {
+            clearDataSheets(googleToken, indexTitle);
+            resolve(true);
+        }, 2000);
+    })
+}
+
+function loopPutData(data, googleToken, indexTitle) {
+    setTimeout(function () { putDataIntoSheets(data.valueSheets, googleToken, indexTitle); }, 1000);
+}
+
+//clear data google sheets
 function clearDataSheets(googleToken, title) {
     var params = {
         spreadsheetId: googleToken,
@@ -720,3 +750,37 @@ $(document).on('click', '#syns-to-sheets', function (event) {
     }, 5000);
     getDataToSheets();
 });
+
+//format cell google sheets
+function formatDataSheet(spreadsheetId, sheetId) {
+    var params = {
+        spreadsheetId: spreadsheetId,
+    };
+
+    var batchUpdateSpreadsheetRequestBody = {
+        requests: [{
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheetId,
+                    "startRowIndex": 0,
+                    "endRowIndex": 5
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "horizontalAlignment": "LEFT",
+                        "textFormat": {
+                            "fontSize": 12,
+                            "bold": true
+                        }
+                    }
+                },
+                "fields": "userEnteredFormat(horizontalAlignment,textFormat)"
+            }
+        }],
+    };
+
+    var request = gapi.client.sheets.spreadsheets.batchUpdate(params, batchUpdateSpreadsheetRequestBody);
+    request.then(function (response) {
+    }, function (reason) {
+    });
+}
